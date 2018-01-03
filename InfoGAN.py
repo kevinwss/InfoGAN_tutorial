@@ -202,40 +202,42 @@ model_directory = './models' #Directory to save trained model to.
 
 init = tf.initialize_all_variables()
 saver = tf.train.Saver()
-with tf.Session() as sess:  
-    sess.run(init)
-    for i in range(iterations):
-        zs = np.random.uniform(-1.0,1.0,size=[batch_size,z_size]).astype(np.float32) #Generate a random z batch
-        lcat = np.random.randint(0,10,[batch_size,len(categorical_list)]) #Generate random c batch
-        lcont = np.random.uniform(-1,1,[batch_size,number_continuous]) #
-        
-        xs,_ = mnist.train.next_batch(batch_size) #Draw a sample batch from MNIST dataset.
-        xs = (np.reshape(xs,[batch_size,28,28,1]) - 0.5) * 2.0 #Transform it to be between -1 and 1
-        xs = np.lib.pad(xs, ((0,0),(2,2),(2,2),(0,0)),'constant', constant_values=(-1, -1)) #Pad the images so the are 32x32
-        
-        _,dLoss = sess.run([update_D,d_loss],feed_dict={z_in:zs,real_in:xs,latent_cat_in:lcat,latent_cont_in:lcont}) #Update the discriminator
 
-        _,gLoss = sess.run([update_G,g_loss],feed_dict={z_in:zs,latent_cat_in:lcat,latent_cont_in:lcont}) #Update the generator, twice for good measure.
-        _,qLoss,qK,qC = sess.run([update_Q,q_loss,q_cont_loss,q_cat_loss],feed_dict={z_in:zs,latent_cat_in:lcat,latent_cont_in:lcont}) #Update to optimize mutual information.
+with tf.Session() as sess:
+    with tf.device("/gpu:0"):
+        sess.run(init)
+        for i in range(iterations):
+            zs = np.random.uniform(-1.0,1.0,size=[batch_size,z_size]).astype(np.float32) #Generate a random z batch
+            lcat = np.random.randint(0,10,[batch_size,len(categorical_list)]) #Generate random c batch
+            lcont = np.random.uniform(-1,1,[batch_size,number_continuous]) #
+            
+            xs,_ = mnist.train.next_batch(batch_size) #Draw a sample batch from MNIST dataset.
+            xs = (np.reshape(xs,[batch_size,28,28,1]) - 0.5) * 2.0 #Transform it to be between -1 and 1
+            xs = np.lib.pad(xs, ((0,0),(2,2),(2,2),(0,0)),'constant', constant_values=(-1, -1)) #Pad the images so the are 32x32
         
-        if i % 100 == 0:
-            print "Gen Loss: " + str(gLoss) + " Disc Loss: " + str(dLoss) + " Q Losses: " + str([qK,qC])
-            z_sample = np.random.uniform(-1.0,1.0,size=[100,z_size]).astype(np.float32) #Generate another z batch
-            lcat_sample = np.reshape(np.array([e for e in range(10) for _ in range(10)]),[100,1])
-            a = a = np.reshape(np.array([[(e/4.5 - 1.)] for e in range(10) for _ in range(10)]),[10,10]).T
-            b = np.reshape(a,[100,1])
-            c = np.zeros_like(b)
-            lcont_sample = np.hstack([b,c])
-            samples = sess.run(Gz,feed_dict={z_in:z_sample,latent_cat_in:lcat_sample,latent_cont_in:lcont_sample}) #Use new z to get sample images from generator.
-            if not os.path.exists(sample_directory):
-                os.makedirs(sample_directory)
+            _,dLoss = sess.run([update_D,d_loss],feed_dict={z_in:zs,real_in:xs,latent_cat_in:lcat,latent_cont_in:lcont}) #Update the discriminator
+
+            _,gLoss = sess.run([update_G,g_loss],feed_dict={z_in:zs,latent_cat_in:lcat,latent_cont_in:lcont}) #Update the generator, twice for good measure.
+            _,qLoss,qK,qC = sess.run([update_Q,q_loss,q_cont_loss,q_cat_loss],feed_dict={z_in:zs,latent_cat_in:lcat,latent_cont_in:lcont}) #Update to optimize mutual information.
+        
+            if i % 100 == 0:
+                print "Gen Loss: " + str(gLoss) + " Disc Loss: " + str(dLoss) + " Q Losses: " + str([qK,qC])
+                z_sample = np.random.uniform(-1.0,1.0,size=[100,z_size]).astype(np.float32) #Generate another z batch
+                lcat_sample = np.reshape(np.array([e for e in range(10) for _ in range(10)]),[100,1])
+                a = a = np.reshape(np.array([[(e/4.5 - 1.)] for e in range(10) for _ in range(10)]),[10,10]).T
+                b = np.reshape(a,[100,1])
+                c = np.zeros_like(b)
+                lcont_sample = np.hstack([b,c])
+                samples = sess.run(Gz,feed_dict={z_in:z_sample,latent_cat_in:lcat_sample,latent_cont_in:lcont_sample}) #Use new z to get sample images from generator.
+                if not os.path.exists(sample_directory):
+                    os.makedirs(sample_directory)
             #Save sample generator images for viewing training progress.
-            save_images(np.reshape(samples[0:100],[100,32,32]),[10,10],sample_directory+'/fig'+str(i)+'.png')
-        if i % 1000 == 0 and i != 0:
-            if not os.path.exists(model_directory):
-                os.makedirs(model_directory)
-            saver.save(sess,model_directory+'/model-'+str(i)+'.cptk')
-            print "Saved Model"
+                save_images(np.reshape(samples[0:100],[100,32,32]),[10,10],sample_directory+'/fig'+str(i)+'.png')
+            if i % 1000 == 0 and i != 0:
+                if not os.path.exists(model_directory):
+                    os.makedirs(model_directory)
+                saver.save(sess,model_directory+'/model-'+str(i)+'.cptk')
+                print "Saved Model"
 
 
 
