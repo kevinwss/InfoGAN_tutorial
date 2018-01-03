@@ -10,6 +10,6 @@ tensorflow 1.4.1
 ## Running
 
 ```bash
-$ git clone git@github.com:kevinwss/IngoGAN_tutorial.git
+$ git clone git@github.com:kevinwss/InfoGAN_tutorial.git
 $ python InfoGAN.py
 ```
