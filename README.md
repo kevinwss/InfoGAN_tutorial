@@ -1,8 +1,6 @@
 # InfoGAN tutorial
 
-## A infoGAN demo
-
-Envirionment:
+Environment:
 
 python 2.7.6 
 
