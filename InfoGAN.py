@@ -135,10 +135,8 @@ real_in = tf.placeholder(shape=[None,32,32,1],dtype=tf.float32) #Real images
 #These placeholders load the latent variables.
 latent_cat_in = tf.placeholder(shape=[None,len(categorical_list)],dtype=tf.int32)
 
-print(latent_cat_in,len(categorical_list))
-
-#latent_cat_list = tf.split(1,len(categorical_list),latent_cat_in)    #error  old version
-latent_cat_list = tf.split(latent_cat_in,len(categorical_list),axis = 1)
+#latent_cat_list = tf.split(1,len(categorical_list),latent_cat_in)    #error  old version in tensorflow <1.0
+latent_cat_list = tf.split(latent_cat_in,len(categorical_list),axis = 1)  #  tensorflow >=1.0
 
 latent_cont_in = tf.placeholder(shape=[None,number_continuous],dtype=tf.float32)
 
