@@ -3,7 +3,9 @@
 ## A infoGAN demo
 
 Envirionment:
-python 2.7.6
+
+python 2.7.6 
+
 tensorflow 1.4.1
 
 
