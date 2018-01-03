@@ -7,5 +7,9 @@ python 2.7.6
 tensorflow 1.4.1
 
 
-Usage:
-python InfoGAN.py
+## Running
+
+```bash
+$ git clone git@github.com:kevinwss/IngoGAN_tutorial.git
+$python InfoGAN.py
+```
