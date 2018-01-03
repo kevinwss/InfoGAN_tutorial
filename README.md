@@ -1,6 +1,6 @@
-# InfoGAN_tutorial
+# InfoGAN tutorial
 
-A infoGAN demo
+## A infoGAN demo
 
 Envirionment:
 python 2.7.6
@@ -11,5 +11,5 @@ tensorflow 1.4.1
 
 ```bash
 $ git clone git@github.com:kevinwss/IngoGAN_tutorial.git
-$python InfoGAN.py
+$ python InfoGAN.py
 ```
